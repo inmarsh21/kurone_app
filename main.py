@@ -41,12 +41,19 @@ def handle_message(event):
 
 @app.route("/callback", methods=["POST"])
 def callback():
-    signature = request.headers["X-Line-Signature"]
+    signature = request.headers.get("X-Line-Signature", "")
     body = request.get_data(as_text=True)
+    print("=== Webhook受信 ===")
+    print("Signature:", signature)
+    print("Body:", body)
     try:
         handler.handle(body, signature)
     except InvalidSignatureError:
+        print("❌ InvalidSignatureError: 署名が一致しませんでした。")
         abort(400)
+    except Exception as e:
+        print("❌ その他の例外発生:", str(e))
+        abort(500)
     return "OK"
 
 @app.route("/")
