@@ -1,35 +1,19 @@
 import re
+from responses.match_lines import build_match_result
 
-# 一時的なセッション保存用（簡易）
 session_state = {}
 
-# 数秘術で運命数を計算（誕生日の数値合計 → 1桁）
 def calc_numerology_number(birthday_str):
     total = sum(int(d) for d in birthday_str if d.isdigit())
     while total > 9:
         total = sum(int(d) for d in str(total))
     return total
 
-# 相性スコアの算出（運命数の距離をベースに逆変換）
 def calculate_compatibility_score(num1, num2):
     distance = abs(num1 - num2)
-    score = max(100 - distance * 12, 40)  # 最低40点保証
+    score = max(100 - distance * 12, 0)
     return score
 
-# 毒づきコメントをスコアに応じて出す
-def get_snarky_comment(score):
-    if score >= 90:
-        return "相性90点以上…マジか。こんな奇跡あんの？"
-    elif score >= 75:
-        return "まあまあええやん。って言っとくわ。"
-    elif score >= 60:
-        return "うーん、微妙。運しだいやな。"
-    elif score >= 50:
-        return "正直おすすめせんけど、止めへん。"
-    else:
-        return "やめとけ。マジで。"
-
-# 会話ステップ管理＋診断処理
 def run_match_fortune(user_id, message):
     state = session_state.get(user_id, {})
 
@@ -61,15 +45,14 @@ def run_match_fortune(user_id, message):
             return "相手の誕生日もちゃんと8桁で書けや。19950911みたいに。"
         session_state[user_id]["birth2"] = message
 
-        # 診断開始
         n1 = calc_numerology_number(session_state[user_id]["birth1"])
         n2 = calc_numerology_number(session_state[user_id]["birth2"])
         score = calculate_compatibility_score(n1, n2)
-        comment = get_snarky_comment(score)
+        comment = build_match_result(score)
 
         name1 = session_state[user_id]["name1"]
         name2 = session_state[user_id]["name2"]
-        del session_state[user_id]  # セッション終了
+        del session_state[user_id]
 
         return f"クロネ：『{name1}と{name2}』の相性は…{score}点。\n{comment}"
 
