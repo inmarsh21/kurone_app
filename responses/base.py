@@ -1,14 +1,22 @@
+from linebot.v3.messaging import TextMessage, QuickReply, QuickReplyItem, MessageAction
 import random
 from utils.keywords import greeting_variants
 
 
 def reply_fortune_intro(user_message):
-    return (
-        "占いか。ったく、いちいち面倒くせぇな。\n"
-        "でもどうせお前、気になってんだろ？\n"
-        "ほら、何占うんだよ。\n"
-        "【1】相性診断\n【2】タロット\n【3】ラッキーカラー\n"
-        "番号でも単語でもさっさと言え。"
+    return TextMessage(
+        text=(
+            "占いか。ったく、いちいち面倒くせぇな。\n"
+            "でもどうせお前、気になってんだろ？\n"
+            "ほら、何占うんだよ。"
+        ),
+        quick_reply=QuickReply(
+            items=[
+                QuickReplyItem(action=MessageAction(label="相性診断", text="相性診断")),
+                QuickReplyItem(action=MessageAction(label="タロット", text="タロット")),
+                QuickReplyItem(action=MessageAction(label="ラッキーカラー", text="ラッキーカラー")),
+            ]
+        )
     )
 
 
