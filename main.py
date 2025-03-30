@@ -1,14 +1,16 @@
 from flask import Flask, request, abort
 import os
-from linebot.v3.messaging import (
-    Configuration,
-    MessagingApi,
-    ApiClient
-)
+from dotenv import load_dotenv
+
+from linebot.v3.messaging import Configuration, MessagingApi, ApiClient
 from linebot.v3.webhook import WebhookHandler
 from linebot.v3.webhooks import MessageEvent, TextMessageContent
 from linebot.exceptions import InvalidSignatureError
+
 from router import route_message
+
+load_dotenv()
+ENABLE_LOGGING = os.getenv("ENABLE_LOGGING", "false").lower() == "true"
 
 app = Flask(__name__)
 
