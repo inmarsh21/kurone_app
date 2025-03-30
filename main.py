@@ -4,7 +4,7 @@ from dotenv import load_dotenv
 
 from linebot.v3.messaging import Configuration, MessagingApi, ApiClient
 from linebot.v3.webhook import WebhookHandler
-from linebot.v3.webhooks import MessageEvent, TextMessageContent
+from linebot.v3.webhooks import MessageEvent, TextMessageContent, StickerMessageContent
 from linebot.exceptions import InvalidSignatureError
 
 from router import route_message
@@ -40,6 +40,17 @@ def handle_message(event):
                 messages=[TextMessage(text=reply_text)]
             )
         )
+@handler.add(MessageEvent, message=StickerMessageContent)
+def handle_sticker(event):
+    reply = "クロネ：は？なんやそのスタンプ。ダサ。"
+    from linebot.v3.messaging import TextMessage, ReplyMessageRequest
+    line_bot_api.reply_message(
+        ReplyMessageRequest(
+            reply_token=event.reply_token,
+            messages=[TextMessage(text=reply)]
+        )
+    )
+
 
 @app.route("/callback", methods=["POST"])
 def callback():
