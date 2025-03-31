@@ -1,5 +1,5 @@
 import re
-from responses.match_lines import build_match_result
+from responses.match_lines import build_match_result # type: ignore
 
 session_state = {}
 
@@ -38,7 +38,7 @@ def run_match_fortune(user_id, message):
     elif step == 3:
         session_state[user_id]["name2"] = message
         session_state[user_id]["step"] = 4
-        return "で、その人の誕生日も教えろ。わからんならテキトーでええわ。"
+        return "で、そいつの誕生日も教えろ。わからんならテキトーでええわ。"
 
     elif step == 4:
         if not re.fullmatch(r"\d{8}", message):
