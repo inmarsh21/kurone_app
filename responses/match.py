@@ -1,6 +1,7 @@
 import re
-from responses.match_lines import build_match_result # type: ignore
-from responses.match_lines import ( # type: ignore
+
+from responses.match_lines import build_match_result
+from responses.match_lines import (
     get_name1_line,
     get_birth1_line,
     get_name2_line,
