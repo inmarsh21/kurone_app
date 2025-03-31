@@ -1,6 +1,11 @@
 import re
-from responses.match_lines import build_match_result # type: ignore
-
+from responses.match_lines import build_match_result
+from responses.match_random_lines import (
+    get_name1_line,
+    get_birth1_line,
+    get_name2_line,
+    get_birth2_line
+)
 session_state = {}
 
 def calc_numerology_number(birthday_str):
@@ -19,26 +24,26 @@ def run_match_fortune(user_id, message):
 
     if not state:
         session_state[user_id] = {"step": 1}
-        return "は？相性診断？…ま、ええわ。まずお前の名前は？"
+        return get_name1_line()
 
     step = state["step"]
 
     if step == 1:
         session_state[user_id]["name1"] = message
         session_state[user_id]["step"] = 2
-        return "で、誕生日は？西暦で書けや。例：19930402"
+        return get_birth1_line()
 
     elif step == 2:
         if not re.fullmatch(r"\d{8}", message):
             return "8桁の数字で書けって。19930402みたいにな。"
         session_state[user_id]["birth1"] = message
         session_state[user_id]["step"] = 3
-        return "相手の名前は？まさか犬とか猫とか言うなよ？"
+        return get_name2_line()
 
     elif step == 3:
         session_state[user_id]["name2"] = message
         session_state[user_id]["step"] = 4
-        return "で、そいつの誕生日も教えろ。わからんならテキトーでええわ。"
+        return get_birth2_line()
 
     elif step == 4:
         if not re.fullmatch(r"\d{8}", message):
