@@ -1,65 +1,80 @@
-import re
+from linebot.models import TextSendMessage
+from responses.ending import ending_response
+import random
+import unicodedata
 
-from responses.match_lines import build_match_result
-from responses.match_lines import (
-    get_name1_line,
-    get_birth1_line,
-    get_name2_line,
-    get_birth2_line
-)
-session_state = {}
-
-def calc_numerology_number(birthday_str):
-    total = sum(int(d) for d in birthday_str if d.isdigit())
-    while total > 9:
-        total = sum(int(d) for d in str(total))
-    return total
-
-def calculate_compatibility_score(num1, num2):
-    distance = abs(num1 - num2)
-    score = max(100 - distance * 12, 0)
+def calculate_score(name1, name2):
+    def name_value(name):
+        return sum(ord(char) for char in name if unicodedata.category(char).startswith('L'))
+    total = name_value(name1) + name_value(name2)
+    score = (total % 91) + 10
     return score
 
-def run_match_fortune(user_id, message):
-    state = session_state.get(user_id, {})
+def match_response(name1, name2):
+    if not name1 or not name2:
+        return [TextSendMessage(text="名前が足りないみたいだな。ちゃんと2人分入力しろよ。")]
 
-    if not state:
-        session_state[user_id] = {"step": 1}
-        return get_name1_line()
+    if len(name1) > 10 or len(name2) > 10:
+        return [TextSendMessage(text="名前、長すぎない？もうちょい普通の名前で頼むわ。")]
 
-    step = state["step"]
+    score = calculate_score(name1, name2)
 
-    if step == 1:
-        session_state[user_id]["name1"] = message
-        session_state[user_id]["step"] = 2
-        return get_birth1_line()
+    def random_comment(options):
+        return random.choice(options)
 
-    elif step == 2:
-        if not re.fullmatch(r"\d{8}", message):
-            return "8桁の数字で書けって。19930402みたいにな。"
-        session_state[user_id]["birth1"] = message
-        session_state[user_id]["step"] = 3
-        return get_name2_line()
+    if score <= 10:
+        comments = [
+            "これはもう…呪われてるレベル。関わらない方がいいって。",
+            "最悪すぎる。逆にどうやったらここまで相性悪くなるんだよ。",
+            "正直、会話すら成立しないんじゃね？別々の世界で生きてる感じ。"
+        ]
+    elif score <= 19:
+        comments = [
+            "マジで最悪。顔合わせるたびにストレスたまるタイプ。",
+            "この組み合わせ、誰が得すんの？意味不明すぎる。",
+            "合わないってレベルじゃないな。地雷原を歩くようなもんだよ。"
+        ]
+    elif score <= 34:
+        comments = [
+            "厳しいな。会話のたびに温度差ありすぎて疲れそう。",
+            "努力すればワンチャンある…かも。でもほぼ無理。",
+            "正直、一緒にいると空気悪くなるタイプの相性だな。"
+        ]
+    elif score <= 49:
+        comments = [
+            "微妙。悪くはないけど、正直つまらない組み合わせ。",
+            "空気みたいな関係ってこのことかもな。存在感ゼロ。",
+            "会っても印象に残らなそう。可もなく不可もなくってやつ。"
+        ]
+    elif score <= 64:
+        comments = [
+            "まあまあ。悪くないけど、刺激も足りない感じ。",
+            "安心はするけど、飽きるのも早そうなペア。",
+            "一緒にいても問題はないけど、盛り上がりには欠けるな。"
+        ]
+    elif score <= 79:
+        comments = [
+            "そこそこいい感じじゃん。正直ちょっと悔しい。",
+            "悪くない。意外と相性いいのかもな。",
+            "これくらいなら文句なし。平和にやっていけそう。"
+        ]
+    elif score <= 89:
+        comments = [
+            "けっこう良いね。素直に認めるわ、羨ましい。",
+            "仲良すぎて見てるこっちがイラっとするレベル。",
+            "相性良すぎて毒吐くタイミングないわ。つまらん。"
+        ]
+    else:
+        comments = [
+            "最高レベル。運命とか信じたくなるくらいの相性。",
+            "ここまで来ると嫉妬すら通り越して呆れるな。",
+            "もう付き合ってんだろ？って言いたくなるくらいぴったりだわ。"
+        ]
 
-    elif step == 3:
-        session_state[user_id]["name2"] = message
-        session_state[user_id]["step"] = 4
-        return get_birth2_line()
+    messages = [
+        TextSendMessage(text=f"スコア：{score}点"),
+        TextSendMessage(text=random_comment(comments)),
+        *ending_response()
+    ]
 
-    elif step == 4:
-        if not re.fullmatch(r"\d{8}", message):
-            return "相手の誕生日もちゃんと8桁で書けや。19950911みたいに。"
-        session_state[user_id]["birth2"] = message
-
-        n1 = calc_numerology_number(session_state[user_id]["birth1"])
-        n2 = calc_numerology_number(session_state[user_id]["birth2"])
-        score = calculate_compatibility_score(n1, n2)
-        comment = build_match_result(score)
-
-        name1 = session_state[user_id]["name1"]
-        name2 = session_state[user_id]["name2"]
-        del session_state[user_id]
-
-        return f"クロネ：『{name1}と{name2}』の相性は…{score}点。\n{comment}"
-
-    return "なんやそれ、意味わからん。"
+    return messages

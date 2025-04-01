@@ -1,7 +1,11 @@
 from linebot.v3.messaging import TextMessage, QuickReply, QuickReplyItem, MessageAction
 import random
 from utils.keywords import greeting_variants
+from responses.match import match_response
+from responses.color import color_response
+from responses.tarot import tarot_response
 
+# 占いメニューの呼びかけ
 
 def reply_fortune_intro(user_message):
     return TextMessage(
@@ -19,7 +23,19 @@ def reply_fortune_intro(user_message):
         )
     )
 
+# 相性診断ラッパー
+def reply_match_intro(name1, name2):
+    return match_response(name1, name2)
 
+# ラッキーカラーラッパー
+def reply_color():
+    return color_response()
+
+# タロットラッパー
+def reply_tarot():
+    return tarot_response()
+
+# ネガティブ系相談に対する応答
 def reply_worry_response(user_message):
     return (
         "はぁ…お前、いきなり重てぇんだよ。\n"
@@ -27,6 +43,6 @@ def reply_worry_response(user_message):
         "しょうがねぇから少しだけ相手してやる。感謝しろ。"
     )
 
-
+# あいさつ・雑談系応答
 def reply_misc(user_message):
     return random.choice(greeting_variants)
