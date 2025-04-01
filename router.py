@@ -15,7 +15,7 @@ def route_message(user_id, user_message):
         return match.run_match_fortune(user_id, message)
 
     elif message in ["2", "タロット"]:
-        return tarot.run_tarot_fortune(user_id, message)
+        return base.reply_tarot()
 
     elif message in ["3", "ラッキーカラー", "カラー", "色"]:
         return color.run_color_fortune(user_id, message)
