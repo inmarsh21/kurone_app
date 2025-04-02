@@ -4,6 +4,7 @@ from linebot.v3.exceptions import InvalidSignatureError
 from linebot.v3.messaging import Configuration, ApiClient, MessagingApi, TextMessage, ReplyMessageRequest
 from linebot.v3.webhooks import MessageEvent, TextMessageContent
 from router import route_message
+import os
 
 app = Flask(__name__)
 
@@ -57,3 +58,7 @@ def handle_message(event):
             messages=messages
         )
     )
+
+if __name__ == "__main__":
+    port = int(os.environ.get("PORT", 10000))
+    app.run(host="0.0.0.0", port=port)
