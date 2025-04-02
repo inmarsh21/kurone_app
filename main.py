@@ -62,32 +62,3 @@ def handle_message(event):
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 10000))
     app.run(host="0.0.0.0", port=port)
-
-@app.route("/callback", methods=['POST'])
-def callback():
-    signature = request.headers.get('X-Line-Signature', '')
-    body = request.get_data(as_text=True)
-    print("📩 [受信ボディ]", body)  # ← 必須ログ①
-
-    try:
-        handler.handle(body, signature)
-    except InvalidSignatureError:
-        print("🛑 シグネチャエラー！")  # ← 必須ログ②
-        abort(400)
-
-    return 'OK'
-
-@handler.add(MessageEvent)
-def handle_message(event):
-    print("🟡 [イベント発生]", event)  # ← 必須ログ③
-
-    if not isinstance(event.message, TextMessageContent):
-        print("🟣 テキストメッセージじゃなかった")  # ← 必須ログ④
-        return
-
-    user_message = event.message.text.strip()
-    user_id = event.source.user_id
-    print(f"🔵 [メッセージ受信] from {user_id}: {user_message}")  # ← 必須ログ⑤
-
-    reply = route_message(user_id, user_message)
-    print(f"🟢 [返答予定]", reply)  # ← 必須ログ⑥
