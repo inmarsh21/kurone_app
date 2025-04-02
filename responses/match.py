@@ -1,4 +1,5 @@
-from linebot.models import TextSendMessage
+
+from linebot.v3.messaging import TextSendMessage
 from responses.ending import ending_response
 import random
 import unicodedata
