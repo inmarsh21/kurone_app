@@ -1,8 +1,7 @@
+
 from responses import base
 from responses import match, tarot, color
 from utils.keywords import fortune_keywords, worry_keywords
-
-session_state = {}
 
 def route_message(user_id, user_message):
     message = user_message.lower()

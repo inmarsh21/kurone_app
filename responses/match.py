@@ -3,6 +3,8 @@ from responses.ending import ending_response
 import random
 import unicodedata
 
+session_state = {}
+
 def calculate_score(name1, name2):
     def name_value(name):
         return sum(ord(char) for char in name if unicodedata.category(char).startswith('L'))
