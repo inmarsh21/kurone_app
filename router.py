@@ -18,7 +18,7 @@ def route_message(user_id, user_message):
         return base.reply_tarot()
 
     elif message in ["3", "ラッキーカラー", "カラー", "色"]:
-        base.reply_color()
+        return base.reply_color()
 
     # 占いワードに該当
     elif any(keyword in message for keyword in fortune_keywords):
