@@ -1,5 +1,4 @@
-
-from linebot.v3.messaging import TextSendMessage
+from linebot.v3.messaging import TextMessage
 from responses.ending import ending_response
 import random
 import unicodedata
@@ -15,10 +14,10 @@ def calculate_score(name1, name2):
 
 def match_response(name1, name2):
     if not name1 or not name2:
-        return [TextSendMessage(text="名前が足りないみたいだな。ちゃんと2人分入力しろよ。")]
+        return [TextMessage(text="名前が足りないみたいだな。ちゃんと2人分入力しろよ。")]
 
     if len(name1) > 10 or len(name2) > 10:
-        return [TextSendMessage(text="名前、長すぎない？もうちょい普通の名前で頼むわ。")]
+        return [TextMessage(text="名前、長すぎない？もうちょい普通の名前で頼むわ。")]
 
     score = calculate_score(name1, name2)
 
@@ -75,8 +74,8 @@ def match_response(name1, name2):
         ]
 
     messages = [
-        TextSendMessage(text=f"スコア：{score}点"),
-        TextSendMessage(text=random_comment(comments)),
+        TextMessage(text=f"スコア：{score}点"),
+        TextMessage(text=random_comment(comments)),
         *ending_response()
     ]
 
