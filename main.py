@@ -1,26 +1,32 @@
 from flask import Flask, request, abort
-import os
-from dotenv import load_dotenv # type: ignore
-
-from linebot.v3.messaging import Configuration, MessagingApi, ApiClient
-from linebot.v3.webhook import WebhookHandler
-from linebot.v3.webhooks import MessageEvent, TextMessageContent, StickerMessageContent
-from linebot.exceptions import InvalidSignatureError
-
+from linebot.v3 import WebhookHandler
+from linebot.v3.exceptions import InvalidSignatureError
+from linebot.v3.messaging import Configuration, ApiClient, MessagingApi, TextMessage, ReplyMessageRequest
+from linebot.v3.webhooks import MessageEvent, TextMessageContent
 from router import route_message
-
-load_dotenv()
-ENABLE_LOGGING = os.getenv("ENABLE_LOGGING", "false").lower() == "true"
 
 app = Flask(__name__)
 
-LINE_CHANNEL_ACCESS_TOKEN = os.environ.get("LINE_CHANNEL_ACCESS_TOKEN")
-LINE_CHANNEL_SECRET = os.environ.get("LINE_CHANNEL_SECRET")
+channel_access_token = "YOUR_CHANNEL_ACCESS_TOKEN"
+channel_secret = "YOUR_CHANNEL_SECRET"
 
-config = Configuration(access_token=LINE_CHANNEL_ACCESS_TOKEN)
-api_client = ApiClient(config)
-line_bot_api = MessagingApi(api_client)
-handler = WebhookHandler(LINE_CHANNEL_SECRET)
+handler = WebhookHandler(channel_secret)
+configuration = Configuration(access_token=channel_access_token)
+
+with ApiClient(configuration) as api_client:
+    line_bot_api = MessagingApi(api_client)
+
+@app.route("/callback", methods=['POST'])
+def callback():
+    signature = request.headers['X-Line-Signature']
+    body = request.get_data(as_text=True)
+
+    try:
+        handler.handle(body, signature)
+    except InvalidSignatureError:
+        abort(400)
+
+    return 'OK'
 
 @handler.add(MessageEvent)
 def handle_message(event):
@@ -30,55 +36,24 @@ def handle_message(event):
     user_message = event.message.text.strip()
     user_id = event.source.user_id
 
-    reply_text = route_message(user_id, user_message)
-    if reply_text:
-        from linebot.v3.messaging import TextMessage, ReplyMessageRequest
+    reply = route_message(user_id, user_message)
 
-        # TextMessage型のオブジェクトかどうかを確認
-        if isinstance(reply_text, TextMessage):
-            message_obj = reply_text
+    if not reply:
+        return
+
+    if not isinstance(reply, list):
+        reply = [reply]
+
+    messages = []
+    for r in reply:
+        if isinstance(r, TextMessage):
+            messages.append(r)
         else:
-            message_obj = TextMessage(text=reply_text)
+            messages.append(TextMessage(text=str(r)))
 
-        line_bot_api.reply_message(
-            ReplyMessageRequest(
-                reply_token=event.reply_token,
-                messages=[message_obj]
-            )
-        )
-@handler.add(MessageEvent, message=StickerMessageContent)
-def handle_sticker(event):
-    reply = "クロネ：は？なんやそのスタンプ。ダサ。"
-    from linebot.v3.messaging import TextMessage, ReplyMessageRequest
     line_bot_api.reply_message(
         ReplyMessageRequest(
             reply_token=event.reply_token,
-            messages=[TextMessage(text=reply)]
+            messages=messages
         )
     )
-
-
-@app.route("/callback", methods=["POST"])
-def callback():
-    signature = request.headers.get("X-Line-Signature", "")
-    body = request.get_data(as_text=True)
-    print("=== Webhook受信 ===")
-    print("Signature:", signature)
-    print("Body:", body)
-    try:
-        handler.handle(body, signature)
-    except InvalidSignatureError:
-        print("❌ InvalidSignatureError: 署名が一致しませんでした。")
-        abort(400)
-    except Exception as e:
-        print("❌ その他の例外発生:", str(e))
-        abort(500)
-    return "OK"
-
-@app.route("/")
-def home():
-    return "クロネBotはRender上で動作中やで！"
-
-if __name__ == "__main__":
-    port = int(os.environ.get("PORT", 10000))
-    app.run(host="0.0.0.0", port=port)
