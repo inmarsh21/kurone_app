@@ -1,4 +1,4 @@
-from linebot.models import TextMessage
+from linebot.v3.messaging import TextMessage
 import random
 
 def ending_response():

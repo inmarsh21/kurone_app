@@ -42,10 +42,10 @@ def match_response(name1, name2):
         comments = ["最高レベル。運命とか信じたくなるくらいの相性。", "ここまで来ると嫉妬すら通り越して呆れるな。", "もう付き合ってんだろ？って言いたくなるくらいぴったりだわ。"]
 
     messages = [
-        TextMessage(text=f"スコア：{score}点"),
-        TextMessage(text=random_comment(comments)),
-        *ending_response()
-    ]
+    TextMessage(text=f"スコア：{score}点"),
+    TextMessage(text=random_comment(comments)),
+    *ending_response()]
+
 
     return messages
 
