@@ -1,4 +1,4 @@
-from linebot.models import TextSendMessage
+from linebot.models import TextMessage
 import random
 
 def ending_response():
@@ -130,4 +130,4 @@ def ending_response():
 
     selected = random.choices(all_endings, weights=weights, k=1)[0]
 
-    return [TextSendMessage(text=msg) for msg in selected]
+    return [TextMessage(text=msg) for msg in selected]
