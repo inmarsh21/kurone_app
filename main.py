@@ -8,8 +8,8 @@ import os
 
 app = Flask(__name__)
 
-channel_access_token = "YOUR_CHANNEL_ACCESS_TOKEN"
-channel_secret = "YOUR_CHANNEL_SECRET"
+channel_access_token = os.environ.get("CHANNEL_ACCESS_TOKEN")
+channel_secret = os.environ.get("CHANNEL_SECRET")
 
 handler = WebhookHandler(channel_secret)
 configuration = Configuration(access_token=channel_access_token)
