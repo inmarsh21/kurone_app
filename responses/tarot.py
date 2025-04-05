@@ -1,7 +1,7 @@
 from linebot.v3.messaging import TextMessage
 import random
 from responses.ending import ending_response
-from kurone_lines import kurone_lines  # クロネセリフデータの読み込み
+from kurone_lines import kurone_lines
 
 poison_comments = [
     "占い頼みもほどほどにせぇよ。",
